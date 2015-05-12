@@ -1,112 +1,119 @@
 ## fhirbase in Paris
 
-* What is fhirbase?
+### What is fhirbase?
 
-Relational storage of FHIR resources in PostgreSQL.
+Relational storage for FHIR resources in PostgreSQL.
+
 Fhirbase implements essential part of FHIR standard directly in postgres.
 
-Fhirbase could be installed in a minutes on top of standard postgresql with version more than 9.4.
-Also fhirbase could be hosted in Amazon RDS and on Heroku Postgres.
+Fhirbase could be installed in a minutes on top of standard postgresql
+with version more than 9.4.
+Fhirbase also could be installed on hosted postgres like Amazon RDS and Heroku.
 
-* Who are fhirbase user?
+### Why we've started fhirbase?
 
-Fhirbase is good choice for development brand new applications based on FHIR.
-
-Fhirbase handles essential part of FHIR standard implementation details and
-allows you focus on implementation of buisness features using any platform of your choice,
-which has connectors to postgresql.
-
-* Why we've started fhirbase?
-
-Our team is mostly polygloth programmers - clojure, ruby, js, sometimes java, c# etc
+Our team is mostly polyglot programmers - clojure, ruby, js, sometimes java, c# etc
 So the idea was to move most of FHIR implementation inside database for reuse.
 
-Leaking abstractions...
+Also we know that data is a heart of many applications and postgresql is a perfect
+tool to deal with data:
 
-* Why postgresql?
+* reuse on diff platforms
+* performance, data & logic locality
+
+### Who is an audience of fhirbase?
+
+Fhirbase is designed for development of new applications based on FHIR.
+
+It handles essential part of FHIR standard implementation details and
+allows you focus on implementation of buisness features using platform of your choice,
+which only has to have a connectors to postgresql.
+
+We alse expect, that for some complicated cases FHIR abstraction layer could be skipped
+and you could use SQL directly for analytic, ad-hock queries or batch updates and migrations.
+
+So from some point of view fhirbase is just ordinary (smart) postgresql database.
+
+### Why postgresql?
 
 Postgresql is most advanced opensource database:
 
- * pure open source
- * good expirience with postgresql in production for a decade
- * jsonb - binary json format
- * advanced indexing with GIST & GIN
- * plenty of procedural languages sql, plpgsql, plv8 (js), plpython
+* pure open source
+* good experience with postgresql in production for a decade
+* jsonb - binary json format
+* advanced indexing with GIST & GIN (Generalized Search Tree & Generalized Inverted Index)
+* extensibility (extensions, different procedural languages etc)
 
+Postgres is a operating system for the data :)
 
-* What parts of FHIR has already been implemented?
-
- * CRUD
- * transactions
- * versioning
- * search
-
-* What is fhirbase API?
-
-Fhirbase API is aligned with FHIR rest interactions:
+### What parts of FHIR has already been implemented?
 
  * CRUD
  * history
- * transaction
+ * transactions (partially)
+ * search
 
-* How fhirbase structured?
+### How fhirbase structured?
 
-* How fhirbase stores resources?
+* Fhirbase consists of API facade implemented as a set of procedures.
+* Reloadable code modules, which make API works
+* Schema migrations (which allows update existing instance of fhirbase)
+* tables to store resources
 
- fhirbase store each resoure in dedicated tables - on for current version and another for historical:
- for example Patient resource will be saved in patient & patient_history tables
+### How fhirbase stores resources?
 
- All tables has similar structure:
+fhirbase stores each resoure type in dedicated tables.
+One for actual versions and another for historical versions.
+
+For example Patient resource will be saved in
+**patient** & **patient_history** tables
+
+Most of tables have similar structure:
 
  * logical_id
  * version_id
- * resource content
+ * resource_type
+ * resource content (as a binary json datatype)
 
-* How fhirbase use metadata?
+For search we inherites all resource tables from resource table.
+Yeh postgresql support table inheretance :)
+When we make query against **resource** table, it searches thro all resource types.
 
- Initial installation of fhirbase consists of several tables for meta-resources.
+### What is fhirbase API?
 
- * struturedefinition
- * searchparameters
- * valuesets, namesystems and concept_maps
+Fhirbase API is aligned with FHIR REST interactions:
 
-* How fhirbase implements versioning?
-* How fhirbase implements search?
+* CRUD
+* history
+* transaction
+* search
 
-  * build dynamic query
+### How fhirbase use metadata?
 
-* How fhirbase makes search fast?
+Initial installation of fhirbase consists of several tables for meta-resources.
 
-* Problem - advanced search
-* Problem - acidentally complicated search API
-* Problem - not full & not consistent meta-information
-* Problem - updates of base resources
+* struturedefinition
+* searchparameters
+* valuesets, namesystems and conceptmaps
 
-* Ideas - advanced search
-* Ideas - distribute metadata in tabular format
-* Ideas - transaction temporal ids
-* Ideas - create/update
-* Ideas - a lot of http stuff in core api
+### How fhirbase implements search?
 
-* How to start with fhirbase?
+* build dynamic query
 
-* Where i could get fhirbase?
+### How fhirbase makes search fast?
 
-* How fhirbase could be updated?
-  * migrations
+### Performance
 
-* How to use fhirbase in production?
+### Usage
 
-* What is fhirbase roadmap?
+* fhirplace
+* netrika laboratory buss
 
- * incorporate terminology
- * referencial consistency
- * validate structure definition and value sets
- * migrate to PLV8
+### What is fhirbase roadmap?
 
-* Commertial production package for fhirbase
+* migrate to PLV8
 
-* Connectors
-  * .NET
-  * .HAPI
-  * clj, js, ruby etc
+* incorporate terminology
+* referencial consistency
+* validate structure definition and value sets
+* Connectors: .NET, HAPI, clj, js, ruby etc
